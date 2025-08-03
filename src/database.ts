@@ -10,7 +10,10 @@ export class Database {
     const supabaseAnonKey = getSupabaseAnonKey();
     
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase configuration is missing');
+      console.error('Supabase configuration check:');
+      console.error('- SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
+      console.error('- SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Missing');
+      throw new Error('Supabase configuration is missing. Please ensure SUPABASE_URL and SUPABASE_ANON_KEY environment variables are set.');
     }
     this.supabase = createClient(supabaseUrl, supabaseAnonKey);
   }

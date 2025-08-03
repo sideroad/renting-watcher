@@ -51,11 +51,21 @@ cp .env.example .env
 
 ### 4. GitHub Secretsの設定
 
-GitHubリポジトリのSettings > Secretsで以下を設定：
+GitHubリポジトリで以下の手順でSecretsを設定：
+
+1. リポジトリの「Settings」タブを開く
+2. 左側メニューの「Secrets and variables」→「Actions」を選択
+3. 「New repository secret」ボタンをクリック
+4. 以下の3つのSecretを追加：
 
 - `SLACK_WEBHOOK_URL`: SlackのWebhook URL
+  - 例: `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`
 - `SUPABASE_URL`: SupabaseプロジェクトのURL
+  - 例: `https://xxxxxxxxxxxxx.supabase.co`
 - `SUPABASE_ANON_KEY`: SupabaseのAnon Key
+  - Supabaseダッシュボードの「Settings」→「API」から取得
+
+**注意**: Secretsが正しく設定されていない場合、GitHub Actionsの実行時に「Supabase configuration is missing」エラーが発生します。
 
 ## ローカルでの実行
 
