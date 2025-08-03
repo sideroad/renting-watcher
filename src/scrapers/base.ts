@@ -23,13 +23,30 @@ export abstract class BaseScraper {
   async scrapeAll(urls: string[]): Promise<Property[]> {
     const allProperties: Property[] = [];
     
-    for (const url of urls) {
-      console.log(`Scraping ${this.constructor.name} URL: ${url}`);
-      const properties = await this.scrapeUrl(url);
-      allProperties.push(...properties);
+    // Process URLs in batches to control concurrency
+    const batchSize = 3; // Process 3 URLs at a time
+    for (let i = 0; i < urls.length; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
       
-      // Rate limiting to avoid being blocked
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Process batch in parallel
+      const batchPromises = batch.map(async (url) => {
+        console.log(`Scraping ${this.constructor.name} URL: ${url}`);
+        try {
+          const properties = await this.scrapeUrl(url);
+          return properties;
+        } catch (error) {
+          console.error(`Error scraping ${url}:`, error);
+          return [];
+        }
+      });
+      
+      const batchResults = await Promise.all(batchPromises);
+      batchResults.forEach(properties => allProperties.push(...properties));
+      
+      // Rate limiting between batches (not after the last batch)
+      if (i + batchSize < urls.length) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
     }
     
     return this.deduplicateProperties(allProperties);

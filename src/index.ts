@@ -3,6 +3,7 @@ import { SuumoScraper, NiftyScraper, GoodroomsScraper, RStoreScraper, YahooRealE
 import { Database } from './database';
 import { SlackNotifier } from './slack';
 import { URLS } from './config';
+import { Property } from './types';
 
 dotenv.config();
 
@@ -36,25 +37,52 @@ async function main() {
     const yahooUrls = URLS.filter(url => url.includes('realestate.yahoo.co.jp'));
     const sumaityUrls = URLS.filter(url => url.includes('sumaity.com'));
     
-    console.log(`Scraping ${suumoUrls.length} Suumo URLs...`);
-    const suumoProperties = suumoUrls.length > 0 ? await suumoScraper.scrapeAll(suumoUrls) : [];
+    // Parallel scraping for each domain
+    const scrapePromises: Promise<Property[]>[] = [];
     
-    console.log(`Scraping ${niftyUrls.length} Nifty URLs...`);
-    const niftyProperties = niftyUrls.length > 0 ? await niftyScraper.scrapeAll(niftyUrls) : [];
+    if (suumoUrls.length > 0) {
+      console.log(`Scraping ${suumoUrls.length} Suumo URLs...`);
+      scrapePromises.push(suumoScraper.scrapeAll(suumoUrls));
+    }
     
-    console.log(`Scraping ${goodroomsUrls.length} Goodrooms URLs...`);
-    const goodroomsProperties = goodroomsUrls.length > 0 ? await goodroomsScraper.scrapeAll(goodroomsUrls) : [];
+    if (niftyUrls.length > 0) {
+      console.log(`Scraping ${niftyUrls.length} Nifty URLs...`);
+      scrapePromises.push(niftyScraper.scrapeAll(niftyUrls));
+    }
     
-    console.log(`Scraping ${rstoreUrls.length} R-Store URLs...`);
-    const rstoreProperties = rstoreUrls.length > 0 ? await rstoreScraper.scrapeAll(rstoreUrls) : [];
+    if (goodroomsUrls.length > 0) {
+      console.log(`Scraping ${goodroomsUrls.length} Goodrooms URLs...`);
+      scrapePromises.push(goodroomsScraper.scrapeAll(goodroomsUrls));
+    }
     
-    console.log(`Scraping ${yahooUrls.length} Yahoo Real Estate URLs...`);
-    const yahooProperties = yahooUrls.length > 0 ? await yahooScraper.scrapeAll(yahooUrls) : [];
+    if (rstoreUrls.length > 0) {
+      console.log(`Scraping ${rstoreUrls.length} R-Store URLs...`);
+      scrapePromises.push(rstoreScraper.scrapeAll(rstoreUrls));
+    }
     
-    console.log(`Scraping ${sumaityUrls.length} Sumaity URLs...`);
-    const sumaityProperties = sumaityUrls.length > 0 ? await sumaityScraper.scrapeAll(sumaityUrls) : [];
+    if (yahooUrls.length > 0) {
+      console.log(`Scraping ${yahooUrls.length} Yahoo Real Estate URLs...`);
+      scrapePromises.push(yahooScraper.scrapeAll(yahooUrls));
+    }
     
-    const allProperties = [...suumoProperties, ...niftyProperties, ...goodroomsProperties, ...rstoreProperties, ...yahooProperties, ...sumaityProperties];
+    if (sumaityUrls.length > 0) {
+      console.log(`Scraping ${sumaityUrls.length} Sumaity URLs...`);
+      scrapePromises.push(sumaityScraper.scrapeAll(sumaityUrls));
+    }
+    
+    // Execute all scrapers in parallel
+    const propertiesArrays = await Promise.allSettled(scrapePromises);
+    
+    // Collect all successful results
+    const allProperties: Property[] = [];
+    propertiesArrays.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        allProperties.push(...result.value);
+      } else {
+        console.error(`Scraper ${index} failed:`, result.reason);
+      }
+    });
+    
     console.log(`Found ${allProperties.length} total properties`);
 
     const newProperties = await database.findNewProperties(allProperties);
