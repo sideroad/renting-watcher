@@ -1,0 +1,35 @@
+{
+  "name": "renting-watcher",
+  "version": "1.0.0",
+  "description": "Suumo rental property scraper with Slack notifications",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "scraper",
+    "suumo",
+    "rental",
+    "slack"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.10",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.14",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^8.57.0",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4"
+  }
+}
