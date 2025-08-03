@@ -8,6 +8,7 @@ export interface Property {
   area: string;
   building_type: string;
   access: string[];
+  image_url?: string;
   created_at?: Date;
   first_seen_at?: Date;
 }

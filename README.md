@@ -29,6 +29,7 @@ CREATE TABLE properties (
   area TEXT NOT NULL,
   building_type TEXT NOT NULL,
   access TEXT[] NOT NULL,
+  image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   first_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

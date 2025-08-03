@@ -23,6 +23,19 @@ export class Database {
     if (error && error.code === '42P01') {
       console.log('Table does not exist, it should be created in Supabase dashboard');
     }
+    
+    // Check if image_url column exists
+    try {
+      const { error: schemaError } = await this.supabase.from('properties').select('image_url').limit(1);
+      if (schemaError && schemaError.message.includes('column "image_url" does not exist')) {
+        console.warn('⚠️ image_url column does not exist in the database. Please run the following SQL in Supabase:');
+        console.warn('ALTER TABLE properties ADD COLUMN image_url TEXT;');
+      } else {
+        console.log('✅ Database schema is up to date with image_url column');
+      }
+    } catch (err) {
+      console.warn('Could not verify database schema:', err);
+    }
   }
 
   async getExistingPropertyIds(): Promise<Set<string>> {
@@ -44,6 +57,13 @@ export class Database {
     // Remove duplicates within the same batch based on ID
     const uniqueProperties = this.removeDuplicateProperties(properties);
     console.log(`Removed ${properties.length - uniqueProperties.length} duplicate properties from batch`);
+
+    // Debug: Log properties with image URLs
+    const propertiesWithImages = uniqueProperties.filter(p => p.image_url);
+    console.log(`📸 ${propertiesWithImages.length} out of ${uniqueProperties.length} properties have images`);
+    propertiesWithImages.forEach(p => {
+      console.log(`  - ${p.title}: ${p.image_url}`);
+    });
 
     const now = new Date().toISOString();
     const propertiesWithTimestamp = uniqueProperties.map(p => ({

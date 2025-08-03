@@ -149,7 +149,7 @@ export class SlackNotifier {
     properties.forEach((property, index) => {
       const globalIndex = (chunkNum - 1) * 5 + index + 1;
       
-      blocks.push({
+      const sectionBlock: any = {
         type: 'section',
         text: {
           type: 'mrkdwn',
@@ -173,7 +173,36 @@ export class SlackNotifier {
           url: property.url,
           action_id: `view_property_${property.id.substring(0, 8)}`
         }
-      } as any);
+      };
+
+      // 画像があればサムネイルとして追加
+      if (property.image_url) {
+        sectionBlock.accessory = {
+          type: 'image',
+          image_url: property.image_url,
+          alt_text: property.title
+        };
+        
+        // ボタンを別ブロックとして追加
+        blocks.push(sectionBlock);
+        blocks.push({
+          type: 'actions',
+          elements: [
+            {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: '詳細を見る',
+                emoji: true
+              },
+              url: property.url,
+              action_id: `view_property_${property.id.substring(0, 8)}`
+            }
+          ]
+        } as any);
+      } else {
+        blocks.push(sectionBlock);
+      }
 
       // Add divider between properties (except for the last one)
       if (index < properties.length - 1) {

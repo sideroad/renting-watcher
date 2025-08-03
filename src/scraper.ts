@@ -70,9 +70,59 @@ export class SuumoScraper {
           const detailUrl = $building.find('a[href*="/chintai/"]').first().attr('href') || '';
           const fullUrl = detailUrl ? `https://suumo.jp${detailUrl}` : '';
 
+          // 画像URLを取得（複数の方法で試行）
+          let imageUrl = '';
+          
+          // 方法1: 通常のimg要素
+          const imageElement = $building.find('img').first();
+          if (imageElement.length > 0) {
+            // rel属性から画像URLを取得（SUUMOの遅延読み込み画像）
+            const rel = imageElement.attr('rel');
+            const src = imageElement.attr('src');
+            const dataSrc = imageElement.attr('data-src');
+            const dataOriginal = imageElement.attr('data-original');
+            
+            if (rel && rel.startsWith('http')) {
+              imageUrl = rel;
+            } else if (src && src.startsWith('http') && !src.includes('data:image')) {
+              imageUrl = src;
+            } else if (dataSrc && dataSrc.startsWith('http') && !dataSrc.includes('data:image')) {
+              imageUrl = dataSrc;
+            } else if (dataOriginal && dataOriginal.startsWith('http') && !dataOriginal.includes('data:image')) {
+              imageUrl = dataOriginal;
+            } else if (rel && rel.startsWith('/')) {
+              imageUrl = `https://suumo.jp${rel}`;
+            } else if (src && src.startsWith('/') && !src.includes('data:image')) {
+              imageUrl = `https://suumo.jp${src}`;
+            }
+          }
+          
+          // 方法2: background-imageスタイルをチェック
+          if (!imageUrl) {
+            $building.find('*').each((_, el) => {
+              const style = $(el).attr('style');
+              if (style && style.includes('background-image')) {
+                const match = style.match(/background-image:\s*url\(['"]?([^'"]+)['"]?\)/);
+                if (match && match[1] && !match[1].includes('data:image')) {
+                  imageUrl = match[1].startsWith('http') ? match[1] : `https://suumo.jp${match[1]}`;
+                  return false; // break
+                }
+              }
+            });
+          }
+          
+          console.log(`Building: ${buildingTitle}, Image URL: ${imageUrl || 'not found'}`);
+
           if ((!buildingTitle || buildingTitle === "") && area && price && fullUrl) {
             const estimatedTitle = `Property-${area}-${price}`;
             const id = generatePropertyId(buildingAddress, area, price);
+            
+            console.log(`🏢 Creating building property object:`, {
+              title: estimatedTitle,
+              image_url: imageUrl || 'undefined',
+              has_image: !!imageUrl
+            });
+            
             properties.push({
               id,
               url: fullUrl,
@@ -82,11 +132,19 @@ export class SuumoScraper {
               layout,
               area,
               building_type: 'apartment',
-              access
+              access,
+              image_url: imageUrl || undefined
             });
           } else if (buildingTitle && area && price && fullUrl) {
             const title = `${buildingTitle} ${layout || ''}`.trim();
             const id = generatePropertyId(buildingAddress, area, price);
+            
+            console.log(`🏢 Creating building property object:`, {
+              title,
+              image_url: imageUrl || 'undefined',
+              has_image: !!imageUrl
+            });
+            
             properties.push({
               id,
               url: fullUrl,
@@ -96,7 +154,8 @@ export class SuumoScraper {
               layout,
               area,
               building_type: 'apartment',
-              access
+              access,
+              image_url: imageUrl || undefined
             });
           }
         });
@@ -124,10 +183,71 @@ export class SuumoScraper {
             access.push(propertyName);
           }
           
+          // 画像URLを取得（複数の方法で試行）
+          let imageUrl = '';
+          
+          // 方法1: 通常のimg要素
+          const allImages = $room.find('img');
+          console.log(`Found ${allImages.length} images for property: ${propertyName}`);
+          
+          allImages.each((idx, img) => {
+            const src = $(img).attr('src');
+            const dataSrc = $(img).attr('data-src');
+            const dataOriginal = $(img).attr('data-original');
+            const rel = $(img).attr('rel');
+            const alt = $(img).attr('alt');
+            console.log(`  Image ${idx}: src="${src}", data-src="${dataSrc}", data-original="${dataOriginal}", rel="${rel}", alt="${alt}"`);
+          });
+          
+          const imageElement = $room.find('img').first();
+          if (imageElement.length > 0) {
+            // rel属性から画像URLを取得（SUUMOの遅延読み込み画像）
+            const rel = imageElement.attr('rel');
+            const src = imageElement.attr('src');
+            const dataSrc = imageElement.attr('data-src');
+            const dataOriginal = imageElement.attr('data-original');
+            
+            if (rel && rel.startsWith('http')) {
+              imageUrl = rel;
+            } else if (src && src.startsWith('http') && !src.includes('data:image')) {
+              imageUrl = src;
+            } else if (dataSrc && dataSrc.startsWith('http') && !dataSrc.includes('data:image')) {
+              imageUrl = dataSrc;
+            } else if (dataOriginal && dataOriginal.startsWith('http') && !dataOriginal.includes('data:image')) {
+              imageUrl = dataOriginal;
+            } else if (rel && rel.startsWith('/')) {
+              imageUrl = `https://suumo.jp${rel}`;
+            } else if (src && src.startsWith('/') && !src.includes('data:image')) {
+              imageUrl = `https://suumo.jp${src}`;
+            }
+          }
+          
+          // 方法2: background-imageスタイルをチェック
+          if (!imageUrl) {
+            $room.find('*').each((_, el) => {
+              const style = $(el).attr('style');
+              if (style && style.includes('background-image')) {
+                const match = style.match(/background-image:\s*url\(['"]?([^'"]+)['"]?\)/);
+                if (match && match[1] && !match[1].includes('data:image')) {
+                  imageUrl = match[1].startsWith('http') ? match[1] : `https://suumo.jp${match[1]}`;
+                  return false; // break
+                }
+              }
+            });
+          }
+          
+          console.log(`Property: ${propertyName}, Image URL: ${imageUrl || 'not found'}`);
           
           if (propertyName && area && price && fullUrl) {
             const title = `${propertyName} ${layout || ''}`.trim();
             const id = generatePropertyId(address, area, price);
+            
+            console.log(`🏠 Creating property object:`, {
+              title,
+              image_url: imageUrl || 'undefined',
+              has_image: !!imageUrl
+            });
+            
             properties.push({
               id,
               url: fullUrl,
@@ -137,10 +257,18 @@ export class SuumoScraper {
               layout,
               area,
               building_type: 'apartment',
-              access
+              access,
+              image_url: imageUrl || undefined
             });
           }
         });
+      }
+
+      const propertiesWithImages = properties.filter(p => p.image_url);
+      console.log(`SUUMO Total properties extracted: ${properties.length}`);
+      console.log(`SUUMO Properties with images: ${propertiesWithImages.length}`);
+      if (properties.length > 0) {
+        console.log(`SUUMO Image success rate: ${((propertiesWithImages.length / properties.length) * 100).toFixed(1)}%`);
       }
 
       return properties;
@@ -204,14 +332,45 @@ export class NiftyScraper {
         try {
           const $property = $(element);
           
-          // 物件タイトル
-          const title = $property.find('.bukken-list-name a').text().trim();
+          // 物件タイトル（複数の方法で試行）
+          let title = $property.find('.bukken-list-name a').text().trim();
           
-          // 価格（家賃）
-          const price = $property.find('.rent').text().trim().replace(/[^\d.万円]/g, '');
+          // フォールバック: 画像のalt属性から取得
+          if (!title) {
+            const altText = $property.find('img.lazyload.thumbnail').attr('alt');
+            if (altText && altText !== '間取り図' && !altText.includes('建物画像')) {
+              title = altText.trim();
+            }
+          }
           
-          // 物件URL
-          const relativeUrl = $property.find('.bukken-list-name a').attr('href');
+          // さらなるフォールバック: 他の要素からタイトルを探す
+          if (!title) {
+            // h3, h2, またはリンクテキストを探す
+            title = $property.find('h3 a, h2 a, a[href*="/detail_"]').first().text().trim();
+          }
+          
+          // 価格（家賃）（複数の方法で試行）
+          let price = $property.find('.rent').text().trim().replace(/[^\d.万円]/g, '');
+          
+          // フォールバック: 万円を含むテキストを探す
+          if (!price) {
+            $property.find('*').each((_, el) => {
+              const text = $(el).text().trim();
+              if (text.includes('万円') && text.length < 15 && /\d+\.?\d*万円/.test(text)) {
+                price = text.replace(/[^\d.万円]/g, '');
+                return false; // break
+              }
+            });
+          }
+          
+          // 物件URL（複数の方法で試行）
+          let relativeUrl = $property.find('.bukken-list-name a').attr('href');
+          
+          // フォールバック: detail_を含むリンクを探す
+          if (!relativeUrl) {
+            relativeUrl = $property.find('a[href*="/detail_"]').attr('href');
+          }
+          
           const fullUrl = relativeUrl ? `https://myhome.nifty.com${relativeUrl}` : '';
           
           // 住所を取得（地図マーカーアイコンの後のテキスト）
@@ -235,10 +394,22 @@ export class NiftyScraper {
             return $(el).text().includes('間取り');
           }).find('td').last().text().trim();
           
-          // 面積
-          const area = $property.find('tr').filter((_, el) => {
+          // 面積（複数の方法で試行）
+          let area = $property.find('tr').filter((_, el) => {
             return $(el).text().includes('専有面積');
           }).find('td').last().text().trim();
+          
+          // フォールバック: m²や㎡を含むテキストを探す
+          if (!area) {
+            $property.find('*').each((_, el) => {
+              const text = $(el).text().trim();
+              if ((text.includes('m²') || text.includes('㎡') || text.includes('m2')) && 
+                  text.length < 20 && /\d+\.?\d*(m²|㎡|m2)/.test(text)) {
+                area = text.match(/\d+\.?\d*(m²|㎡|m2)/)?.[0] || '';
+                if (area) return false; // break
+              }
+            });
+          }
           
           // 階数
           const floor = $property.find('tr').filter((_, el) => {
@@ -254,9 +425,65 @@ export class NiftyScraper {
             }
           });
           
+          // 画像URLを取得（複数の方法で試行）
+          let imageUrl = '';
+          
+          // lazyloadクラスの画像を優先的に使用
+          const allImages = $property.find('img');
+          allImages.each((idx, img) => {
+            const $img = $(img);
+            const className = $img.attr('class');
+            const dataSrc = $img.attr('data-src');
+            
+            // lazyload クラスの画像を優先的に使用
+            if (!imageUrl && className && className.includes('lazyload') && dataSrc && dataSrc !== 'undefined' && dataSrc.startsWith('http')) {
+              imageUrl = dataSrc;
+            }
+          });
+          
+          // フォールバック: 従来の方法
+          if (!imageUrl) {
+            const imageElement = $property.find('img').first();
+            if (imageElement.length > 0) {
+              const dataSrc = imageElement.attr('data-src');
+              const src = imageElement.attr('src');
+              const dataOriginal = imageElement.attr('data-original');
+              
+              if (dataSrc && dataSrc !== 'undefined' && dataSrc.startsWith('http') && !dataSrc.includes('data:image')) {
+                imageUrl = dataSrc;
+              } else if (dataOriginal && dataOriginal !== 'undefined' && dataOriginal.startsWith('http') && !dataOriginal.includes('data:image')) {
+                imageUrl = dataOriginal;
+              } else if (src && src.startsWith('http') && !src.includes('data:image') && !src.includes('icon_mansion_apart.svg') && !src.includes('lazy-load-pc.gif')) {
+                imageUrl = src;
+              }
+            }
+          }
+          
+          // 方法2: background-imageスタイルをチェック
+          if (!imageUrl) {
+            $property.find('*').each((_, el) => {
+              const style = $(el).attr('style');
+              if (style && style.includes('background-image')) {
+                const match = style.match(/background-image:\s*url\(['"]?([^'"]+)['"]?\)/);
+                if (match && match[1] && !match[1].includes('data:image') && !match[1].includes('icon_mansion_apart.svg') && !match[1].includes('lazy-load-pc.gif')) {
+                  imageUrl = match[1].startsWith('http') ? match[1] : `https://myhome.nifty.com${match[1]}`;
+                  return false; // break
+                }
+              }
+            });
+          }
+          
+          console.log(`Nifty Property: ${title}, Image URL: ${imageUrl || 'not found'}`);
+          
           if (title && price && fullUrl && area) {
             const id = generatePropertyId(address, area, price);
             const propertyTitle = `${title} ${floor} ${layout}`.trim();
+            
+            console.log(`🏠 Creating Nifty property object:`, {
+              title: propertyTitle,
+              image_url: imageUrl || 'undefined',
+              has_image: !!imageUrl
+            });
             
             properties.push({
               id,
@@ -267,7 +494,8 @@ export class NiftyScraper {
               layout,
               area,
               building_type: 'apartment',
-              access
+              access,
+              image_url: imageUrl || undefined
             });
           }
         } catch (err) {
@@ -275,7 +503,11 @@ export class NiftyScraper {
         }
       });
 
+      const propertiesWithImages = properties.filter(p => p.image_url);
       console.log(`Total properties extracted: ${properties.length}`);
+      console.log(`Properties with images: ${propertiesWithImages.length}`);
+      console.log(`Image success rate: ${((propertiesWithImages.length / properties.length) * 100).toFixed(1)}%`);
+      
       return properties;
     } catch (error) {
       console.error(`Error scraping Nifty ${url}:`, error);
