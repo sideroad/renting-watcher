@@ -72,7 +72,7 @@ export class SuumoScraper {
 
           if ((!buildingTitle || buildingTitle === "") && area && price && fullUrl) {
             const estimatedTitle = `Property-${area}-${price}`;
-            const id = generatePropertyId(estimatedTitle, area, price);
+            const id = generatePropertyId(buildingAddress, area, price);
             properties.push({
               id,
               url: fullUrl,
@@ -86,7 +86,7 @@ export class SuumoScraper {
             });
           } else if (buildingTitle && area && price && fullUrl) {
             const title = `${buildingTitle} ${layout || ''}`.trim();
-            const id = generatePropertyId(title, area, price);
+            const id = generatePropertyId(buildingAddress, area, price);
             properties.push({
               id,
               url: fullUrl,
@@ -127,7 +127,7 @@ export class SuumoScraper {
           
           if (propertyName && area && price && fullUrl) {
             const title = `${propertyName} ${layout || ''}`.trim();
-            const id = generatePropertyId(title, area, price);
+            const id = generatePropertyId(address, area, price);
             properties.push({
               id,
               url: fullUrl,

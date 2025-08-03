@@ -17,6 +17,13 @@ async function main() {
 
     await database.initializeDatabase();
 
+    // Check for delete all flag
+    const shouldDeleteAll = process.argv.includes('--delete-all');
+    if (shouldDeleteAll) {
+      console.log('Deleting all existing properties...');
+      await database.deleteAllProperties();
+    }
+
     // Separate URLs by domain
     const suumoUrls = URLS.filter(url => url.includes('suumo.jp'));
     const niftyUrls = URLS.filter(url => url.includes('myhome.nifty.com'));
