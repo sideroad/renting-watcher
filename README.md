@@ -158,3 +158,24 @@ npm start -- --delete-all
 `src/config.ts`の`URLS`配列に設定されたURLは、ドメインによって自動的に振り分けられます：
 - `suumo.jp`を含むURL → SUUMOスクレイパー
 - `myhome.nifty.com`を含むURL → Nifty賃貸スクレイパー
+
+## トラブルシューティング
+
+### GitHub Actionsで「Supabase configuration is missing」エラーが発生する場合
+
+1. **GitHub Secretsが正しく設定されているか確認**
+   - リポジトリの Settings → Secrets and variables → Actions を開く
+   - `SUPABASE_URL`、`SUPABASE_ANON_KEY`、`SLACK_WEBHOOK_URL` の3つが登録されているか確認
+   - Secret名は大文字で正確に入力されているか確認
+
+2. **Secretsの値が空でないか確認**
+   - 各Secretの「Update」ボタンから値が入力されているか確認
+   - コピー&ペースト時に余分な空白が入っていないか確認
+
+3. **リポジトリの権限を確認**
+   - フォークしたリポジトリの場合、Secretsは引き継がれないため再設定が必要
+   - Organization所有のリポジトリの場合、Secretsへのアクセス権限を確認
+
+4. **Actions実行ログで確認**
+   - 「Check environment setup」ステップで各Secretが「configured」と表示されるか確認
+   - 「not configured」の場合は、そのSecretが設定されていない

@@ -29,6 +29,13 @@ jobs:
     - name: Build TypeScript
       run: npm run build
 
+    - name: Check environment setup
+      run: |
+        echo "Checking if secrets are available..."
+        echo "SLACK_WEBHOOK_URL is: ${{ secrets.SLACK_WEBHOOK_URL != '' && 'configured' || 'not configured' }}"
+        echo "SUPABASE_URL is: ${{ secrets.SUPABASE_URL != '' && 'configured' || 'not configured' }}"
+        echo "SUPABASE_ANON_KEY is: ${{ secrets.SUPABASE_ANON_KEY != '' && 'configured' || 'not configured' }}"
+
     - name: Run scraper
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
