@@ -1,7 +1,7 @@
 {
   "name": "renting-watcher",
   "version": "1.0.0",
-  "description": "Suumo rental property scraper with Slack notifications",
+  "description": "Multi-site rental property scraper with Slack notifications and comprehensive testing",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
@@ -15,9 +15,17 @@
   },
   "keywords": [
     "scraper",
-    "suumo",
     "rental",
-    "slack"
+    "suumo",
+    "nifty",
+    "goodrooms",
+    "yahoo-real-estate",
+    "sumaity",
+    "r-store",
+    "slack",
+    "typescript",
+    "jest",
+    "github-actions"
   ],
   "author": "",
   "license": "MIT",

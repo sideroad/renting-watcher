@@ -1,15 +1,19 @@
 # Renting Watcher
 
-SUUMO・Nifty賃貸の物件を定期的にスクレイピングし、新着物件をSlackに通知するバッチシステムです。
+複数の賃貸サイトから物件を定期的にスクレイピングし、新着物件をSlackに通知するバッチシステムです。
 
 ## 機能
 
-- 朝8時〜22時（JST）まで1時間おきにGitHub Actionsで自動実行
-- SUUMO・Nifty賃貸の設定URLから物件情報をスクレイピング
-- ページネーション対応で全ページの物件を取得
+- 朝7時〜22時（JST）まで1時間おきにGitHub Actionsで自動実行
+- 複数の賃貸サイトに対応：SUUMO、Nifty賃貸、Goodrooms、R-Store、Yahoo不動産、スマイティ
+- 設定URLから物件情報をスクレイピング（ページネーション対応）
 - 住所・面積・価格の正規化による高精度な重複物件の検出
+- 画像URL取得機能付き
 - Supabaseデータベースに物件情報を保存（upsertによる安全な保存）
 - 新着物件をSlackに詳細通知（メッセージ分割・ソート機能付き）
+- モジュラー設計：各サイト専用のスクレイパーとユーティリティ
+- 包括的なエラーハンドリングとレート制限機能
+- Jest テストスイート付き
 
 ## セットアップ
 
@@ -97,7 +101,7 @@ npm run dev
 
 ### 検索URLの変更
 
-`src/config.ts`の`URLS`配列を編集して、監視したいSUUMO・Nifty賃貸の検索URLを設定できます。URLのドメインによって自動的に適切なスクレイパーが選択されます。
+`src/config.ts`の`URLS`配列を編集して、監視したい賃貸サイトの検索URLを設定できます。URLのドメインによって自動的に適切なスクレイパーが選択されます。
 
 ```typescript
 export const URLS = [
@@ -105,6 +109,14 @@ export const URLS = [
     'https://suumo.jp/jj/chintai/...',
     // Nifty URLs  
     'https://myhome.nifty.com/rent/...',
+    // Goodrooms URLs
+    'https://www.goodrooms.jp/tokyo/search/...',
+    // R-Store URLs
+    'https://www.r-store.jp/search/...',
+    // Yahoo Real Estate URLs
+    'https://realestate.yahoo.co.jp/rent/search/...',
+    // Sumaity URLs
+    'https://sumaity.com/chintai/...',
 ];
 ```
 
@@ -113,6 +125,22 @@ export const URLS = [
 `.github/workflows/scrape.yml`のcron設定を変更することで、実行頻度を調整できます。
 
 ## コマンドライン操作
+
+### 開発・テスト
+
+```bash
+# TypeScriptの型チェック
+npm run typecheck
+
+# ESLintによる構文チェック
+npm run lint
+
+# Jestテストの実行
+npm test
+
+# ウォッチモードでテスト実行
+npm run test:watch
+```
 
 ### 全データ削除
 
@@ -153,12 +181,46 @@ npm start -- --delete-all
 
 - **SUUMO**: 物件一覧・詳細ページ（建物ごと表示・部屋ごと表示の両方に対応）
 - **Nifty賃貸**: ページネーション対応で全ページ取得
+- **Goodrooms**: 詳細リンク検出とおすすめセクション除外機能
+- **R-Store**: 複数のフォールバックセレクター対応
+- **Yahoo不動産**: ListBukken__itemセレクター対応
+- **スマイティ**: 複合的な物件リンク検出システム
 
 ### URLの自動振り分け
 
 `src/config.ts`の`URLS`配列に設定されたURLは、ドメインによって自動的に振り分けられます：
 - `suumo.jp`を含むURL → SUUMOスクレイパー
 - `myhome.nifty.com`を含むURL → Nifty賃貸スクレイパー
+- `goodrooms.jp`を含むURL → Goodroomsスクレイパー
+- `r-store.jp`を含むURL → R-Storeスクレイパー
+- `realestate.yahoo.co.jp`を含むURL → Yahoo不動産スクレイパー
+- `sumaity.com`を含むURL → スマイティスクレイパー
+
+### プロジェクト構造
+
+```
+src/
+├── scrapers/           # 各サイト専用スクレイパー
+│   ├── base.ts        # ベーススクレイパークラス
+│   ├── suumo.ts       # SUUMOスクレイパー
+│   ├── nifty.ts       # Nifty賃貸スクレイパー
+│   ├── goodrooms.ts   # Goodroomsスクレイパー
+│   ├── rstore.ts      # R-Storeスクレイパー
+│   ├── yahoo.ts       # Yahoo不動産スクレイパー
+│   ├── sumaity.ts     # スマイティスクレイパー
+│   └── index.ts       # スクレイパーエクスポート
+├── utils/             # ユーティリティ関数
+│   ├── address.ts     # 住所正規化関数
+│   ├── property.ts    # プロパティID生成
+│   ├── errors.ts      # エラーハンドリング
+│   └── index.ts       # ユーティリティエクスポート
+├── types/             # TypeScript型定義
+│   └── index.ts
+├── config.ts          # 設定ファイル
+├── database.ts        # データベース操作
+├── slack.ts          # Slack通知機能
+└── index.ts          # メインエントリポイント
+```
 
 ## トラブルシューティング
 
