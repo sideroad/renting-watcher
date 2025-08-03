@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { SuumoScraper, NiftyScraper } from './scraper';
+import { SuumoScraper, NiftyScraper, GoodroomsScraper } from './scraper';
 import { Database } from './database';
 import { SlackNotifier } from './slack';
 import { URLS } from './config';
@@ -12,6 +12,7 @@ async function main() {
     
     const suumoScraper = new SuumoScraper();
     const niftyScraper = new NiftyScraper();
+    const goodroomsScraper = new GoodroomsScraper();
     const database = new Database();
     const notifier = new SlackNotifier();
 
@@ -27,6 +28,7 @@ async function main() {
     // Separate URLs by domain
     const suumoUrls = URLS.filter(url => url.includes('suumo.jp'));
     const niftyUrls = URLS.filter(url => url.includes('myhome.nifty.com'));
+    const goodroomsUrls = URLS.filter(url => url.includes('goodrooms.jp'));
     
     console.log(`Scraping ${suumoUrls.length} Suumo URLs...`);
     const suumoProperties = suumoUrls.length > 0 ? await suumoScraper.scrapeAll(suumoUrls) : [];
@@ -34,7 +36,10 @@ async function main() {
     console.log(`Scraping ${niftyUrls.length} Nifty URLs...`);
     const niftyProperties = niftyUrls.length > 0 ? await niftyScraper.scrapeAll(niftyUrls) : [];
     
-    const allProperties = [...suumoProperties, ...niftyProperties];
+    console.log(`Scraping ${goodroomsUrls.length} Goodrooms URLs...`);
+    const goodroomsProperties = goodroomsUrls.length > 0 ? await goodroomsScraper.scrapeAll(goodroomsUrls) : [];
+    
+    const allProperties = [...suumoProperties, ...niftyProperties, ...goodroomsProperties];
     console.log(`Found ${allProperties.length} total properties`);
 
     const newProperties = await database.findNewProperties(allProperties);
