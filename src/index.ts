@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { SuumoScraper, NiftyScraper, GoodroomsScraper } from './scraper';
+import { SuumoScraper, NiftyScraper, GoodroomsScraper, RStoreScraper, YahooRealEstateScraper, SumaityScraper } from './scrapers';
 import { Database } from './database';
 import { SlackNotifier } from './slack';
 import { URLS } from './config';
@@ -13,6 +13,9 @@ async function main() {
     const suumoScraper = new SuumoScraper();
     const niftyScraper = new NiftyScraper();
     const goodroomsScraper = new GoodroomsScraper();
+    const rstoreScraper = new RStoreScraper();
+    const yahooScraper = new YahooRealEstateScraper();
+    const sumaityScraper = new SumaityScraper();
     const database = new Database();
     const notifier = new SlackNotifier();
 
@@ -29,6 +32,9 @@ async function main() {
     const suumoUrls = URLS.filter(url => url.includes('suumo.jp'));
     const niftyUrls = URLS.filter(url => url.includes('myhome.nifty.com'));
     const goodroomsUrls = URLS.filter(url => url.includes('goodrooms.jp'));
+    const rstoreUrls = URLS.filter(url => url.includes('r-store.jp'));
+    const yahooUrls = URLS.filter(url => url.includes('realestate.yahoo.co.jp'));
+    const sumaityUrls = URLS.filter(url => url.includes('sumaity.com'));
     
     console.log(`Scraping ${suumoUrls.length} Suumo URLs...`);
     const suumoProperties = suumoUrls.length > 0 ? await suumoScraper.scrapeAll(suumoUrls) : [];
@@ -39,7 +45,16 @@ async function main() {
     console.log(`Scraping ${goodroomsUrls.length} Goodrooms URLs...`);
     const goodroomsProperties = goodroomsUrls.length > 0 ? await goodroomsScraper.scrapeAll(goodroomsUrls) : [];
     
-    const allProperties = [...suumoProperties, ...niftyProperties, ...goodroomsProperties];
+    console.log(`Scraping ${rstoreUrls.length} R-Store URLs...`);
+    const rstoreProperties = rstoreUrls.length > 0 ? await rstoreScraper.scrapeAll(rstoreUrls) : [];
+    
+    console.log(`Scraping ${yahooUrls.length} Yahoo Real Estate URLs...`);
+    const yahooProperties = yahooUrls.length > 0 ? await yahooScraper.scrapeAll(yahooUrls) : [];
+    
+    console.log(`Scraping ${sumaityUrls.length} Sumaity URLs...`);
+    const sumaityProperties = sumaityUrls.length > 0 ? await sumaityScraper.scrapeAll(sumaityUrls) : [];
+    
+    const allProperties = [...suumoProperties, ...niftyProperties, ...goodroomsProperties, ...rstoreProperties, ...yahooProperties, ...sumaityProperties];
     console.log(`Found ${allProperties.length} total properties`);
 
     const newProperties = await database.findNewProperties(allProperties);
