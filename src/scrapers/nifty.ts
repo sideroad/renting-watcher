@@ -163,35 +163,35 @@ export class NiftyScraper extends BaseScraper {
 
   // Use base class implementation for scrapeAll
 
-  private extractNiftyImage($property: cheerio.Cheerio<cheerio.Element>): string {
-    let imageUrl = '';
+  private extractNiftyImage($property: any): string | undefined {
+    let imageUrl: string | undefined;
     
-    // lazyloadクラスの画像を優先的に使用
-    const allImages = $property.find('img');
-    allImages.each((idx, img) => {
-      const $img = $property.constructor(img) as cheerio.Cheerio<cheerio.Element>;
-      const className = $img.attr('class');
+    // 方法1: lazy-image-container内のimgタグを探す
+    $property.find('.lazy-image-container img').each((_: any, img: any) => {
+      const $img = cheerio.load(img)('body').children().first();
+      const src = $img.attr('src');
       const dataSrc = $img.attr('data-src');
       
-      // lazyload クラスの画像を優先的に使用
-      if (!imageUrl && className && className.includes('lazyload') && dataSrc && dataSrc !== 'undefined' && dataSrc.startsWith('http')) {
+      if (src && !src.includes('lazy-load-pc.gif')) {
+        imageUrl = src;
+      } else if (dataSrc) {
         imageUrl = dataSrc;
       }
     });
     
     // フォールバック: 従来の方法
     if (!imageUrl) {
-      imageUrl = this.extractImageUrl($property, 'https://myhome.nifty.com');
+      imageUrl = this.extractImageUrl($property, 'https://myhome.nifty.com') || undefined;
     }
     
     // 方法2: background-imageスタイルをチェック
     if (!imageUrl) {
-      imageUrl = this.extractBackgroundImage($property, 'https://myhome.nifty.com');
+      imageUrl = this.extractBackgroundImage($property) || undefined;
     }
     
     // Filter out unwanted images
     if (imageUrl && (imageUrl.includes('icon_mansion_apart.svg') || imageUrl.includes('lazy-load-pc.gif'))) {
-      imageUrl = '';
+      imageUrl = undefined;
     }
     
     return imageUrl;
