@@ -4,7 +4,7 @@
 
 ## 機能
 
-- 朝7時〜22時（JST）まで1時間おきにGitHub Actionsで自動実行
+- 朝7時〜22時（JST）まで30分おきにGitHub Actionsで自動実行
 - 複数の賃貸サイトに対応：SUUMO、Nifty賃貸、Goodrooms、R-Store、Yahoo不動産、スマイティ
 - 設定URLから物件情報をスクレイピング（ページネーション対応）
 - 住所・面積・価格の正規化による高精度な重複物件の検出
