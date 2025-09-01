@@ -1,15 +1,71 @@
-賃貸情報をスクレイピングするバッチを作成してください。
+# Claude Code Spec-Driven Development
 
-# 機能概要
-- 朝8時~22時（JST）まで１時間おきにGithubActionsで実行する
-- 配列定数で定義された検索条件のsuumoのURLをスクレイピングする
-- スクレイピングされた結果は無料のDBに保存する
-- 新しく追加された物件がある場合Slackに通知を飛ばす。(https://hooks.slack.com/services/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)
+Kiro-style Spec Driven Development implementation using claude code slash commands, hooks and agents.
 
-# 配列定数
-const URLS = [
-    'https://suumo.jp/jj/chintai/ichiran/FR301FC005/?mt=9999999&cn=9999999&ra=013&et=15&tc=0400101&tc=0400908&tc=0401102&shkr1=03&ar=030&bs=040&ct=35.0&shkr3=03&shkr2=03&mb=65&sngz=&rn=0265&rn=0280&shkr4=03&cb=0.0&ts=1&ts=2',
-    'https://suumo.jp/jj/chintai/ichiran/FR301FC005/?fw2=&ek=030525620&ek=030510270&ek=030506970&ek=030520470&ek=030501820&ek=030502980&ek=030541160&ek=030517470&ek=030521520&ek=030541280&ek=030519670&ek=030505600&ek=030532110&ek=030527280&ek=030513930&ek=030500640&ek=030506640&ek=030528500&ek=030511640&ek=030536880&ek=030538740&ek=030531920&ek=030538710&ek=030514690&ek=030528740&ek=030512780&ek=030523100&mt=9999999&cn=9999999&ra=013&et=15&tc=0400101&tc=0400908&tc=0401102&shkr1=03&ar=030&bs=040&ct=35.0&shkr3=03&shkr2=03&mb=65&rn=0305&shkr4=03&cb=0.0&ts=1&ts=2',
+## Project Context
 
-];
+### Paths
+- Steering: `.kiro/steering/`
+- Specs: `.kiro/specs/`
+- Commands: `.claude/commands/`
 
+### Steering vs Specification
+
+**Steering** (`.kiro/steering/`) - Guide AI with project-wide rules and context  
+**Specs** (`.kiro/specs/`) - Formalize development process for individual features
+
+### Active Specifications
+- Check `.kiro/specs/` for active specifications
+- Use `/kiro:spec-status [feature-name]` to check progress
+
+## Development Guidelines
+- Think in English, generate responses in English
+
+## Workflow
+
+### Phase 0: Steering (Optional)
+`/kiro:steering` - Create/update steering documents  
+`/kiro:steering-custom` - Create custom steering for specialized contexts
+
+Note: Optional for new features or small additions. You can proceed directly to spec-init.
+
+### Phase 1: Specification Creation
+1. `/kiro:spec-init [detailed description]` - Initialize spec with detailed project description
+2. `/kiro:spec-requirements [feature]` - Generate requirements document
+3. `/kiro:spec-design [feature]` - Interactive: "Have you reviewed requirements.md? [y/N]"
+4. `/kiro:spec-tasks [feature]` - Interactive: Confirms both requirements and design review
+
+### Phase 2: Progress Tracking
+`/kiro:spec-status [feature]` - Check current progress and phases
+
+## Development Rules
+1. **Consider steering**: Run `/kiro:steering` before major development (optional for new features)
+2. **Follow 3-phase approval workflow**: Requirements → Design → Tasks → Implementation
+3. **Approval required**: Each phase requires human review (interactive prompt or manual)
+4. **No skipping phases**: Design requires approved requirements; Tasks require approved design
+5. **Update task status**: Mark tasks as completed when working on them
+6. **Keep steering current**: Run `/kiro:steering` after significant changes
+7. **Check spec compliance**: Use `/kiro:spec-status` to verify alignment
+
+## Steering Configuration
+
+### Current Steering Files
+Managed by `/kiro:steering` command. Updates here reflect command changes.
+
+### Active Steering Files
+- `product.md`: Always included - Product context and business objectives
+- `tech.md`: Always included - Technology stack and architectural decisions
+- `structure.md`: Always included - File organization and code patterns
+
+### Custom Steering Files
+<!-- Added by /kiro:steering-custom command -->
+<!-- Format: 
+- `filename.md`: Mode - Pattern(s) - Description
+  Mode: Always|Conditional|Manual
+  Pattern: File patterns for Conditional mode
+-->
+
+### Inclusion Modes
+- **Always**: Loaded in every interaction (default)
+- **Conditional**: Loaded for specific file patterns (e.g., "*.test.js")
+- **Manual**: Reference with `@filename.md` syntax
