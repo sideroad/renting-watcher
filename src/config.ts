@@ -7,6 +7,7 @@ export const URLS = [
     'https://suumo.jp/jj/chintai/ichiran/FR301FC005/?fw2=&ek=023023580&mt=9999999&cn=20&ra=014&et=10&tc=0401102&smk=&shkr1=03&ar=030&bs=040&ct=40.0&shkr3=03&shkr2=03&mb=70&rn=0230&shkr4=03&cb=0.0&ts=1', // たまプラーザ
     'https://suumo.jp/jj/chintai/ichiran/FR301FC005/?fw2=&ek=024020370&mt=9999999&cn=20&ra=014&et=10&tc=0401102&tc=0400101&tc=0401106&smk=&shkr1=03&ar=030&bs=040&ct=40.0&shkr3=03&shkr2=03&mb=70&rn=0240&shkr4=03&cb=0.0&ts=1', // 新百合ヶ丘
     'https://suumo.jp/jj/chintai/ichiran/FR301FC005/?fw2=&ek=020538730&mt=9999999&cn=9999999&ra=013&et=10&tc=0401102&tc=0400801&smk=&shkr1=03&ar=030&bs=040&ct=35.0&shkr3=03&shkr2=03&mb=70&rn=0205&shkr4=03&cb=0.0', // 武蔵小山
+    'https://suumo.jp/jj/chintai/ichiran/FR301FC005/?ar=030&bs=040&fw2=&pc=30&po1=25&po2=99&ra=014&rn=0230&ek=023000210&cb=0.0&ct=35.0&et=10&mb=70&mt=9999999&cn=9999999&tc=0400101&tc=0400907&tc=0400801&tc=0401102&shkr1=03&shkr2=03&shkr3=03&shkr4=03', // 青葉台
 
     // Nifty URLs
     'https://myhome.nifty.com/rent/tokyo/koenji_st/?lines=tokyo:chuohonsen&stations=tokyo:asagaya,tokyo:higashikoganei,tokyo:hino,tokyo:kichijoji,tokyo:kokubunji,tokyo:kunitachi,tokyo:mitaka,tokyo:musashikoganei,tokyo:musashisakai,tokyo:nishikokubunji,tokyo:nishiogikubo,tokyo:ogikubo,tokyo:tachikawa&r2=300000&r20=1,2&r6=15&r10=65&ex3=1&floors2=1&ex21=1&sort=recommend',
